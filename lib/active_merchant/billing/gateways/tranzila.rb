@@ -420,10 +420,10 @@ module ActiveMerchant #:nodoc:
           :currency => @options[:currency],
           :myid => options[:myid],
 
-          #transaction with monthly installments not supported yet
-          #:fpay => options[:myid],
-          #:spay => options[:spay],
-          #:npay => options[:npay],
+          #transaction with installments (field - cred_type must be 8)
+          :fpay => options[:fpay] || '',
+          :spay => options[:spay] || '',
+          :npay => options[:npay] || '1',
 
           #tranzila registered supplier (test3)
           :supplier => @options[:supplier]
