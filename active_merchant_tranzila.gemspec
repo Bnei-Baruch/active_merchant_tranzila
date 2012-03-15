@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
      "lib/active_merchant/billing/gateways/tranzila.rb",
      "lib/active_merchant_tranzila.rb",
      "test/helper.rb",
-     "test/remote/gateways/remote_tranzila_test.rb",
      "test/unit/gateways/tranzila_test.rb"
   ]
   s.homepage = %q{http://github.com/vitaly/active_merchant_tranzila}
