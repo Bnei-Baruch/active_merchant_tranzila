@@ -32,7 +32,6 @@ Gem::Specification.new do |s|
   s.summary = %q{TODO: one-line summary of your gem}
   s.test_files = [
     "test/helper.rb",
-     "test/remote/gateways/remote_tranzila_test.rb",
      "test/unit/gateways/tranzila_test.rb"
   ]
 
