@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Vitaly Kushner"]
   s.date = %q{2010-08-11}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{Tranzila Gateway for Money Gem}
   s.email = %q{vitaly@astrails.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.6}
-  s.summary = %q{TODO: one-line summary of your gem}
+  s.summary = %q{Tranzila Gateway for Money Gem}
   s.test_files = [
     "test/helper.rb",
      "test/unit/gateways/tranzila_test.rb"
