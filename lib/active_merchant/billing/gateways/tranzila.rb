@@ -35,7 +35,7 @@ module ActiveMerchant #:nodoc:
     class TranzilaGateway < Gateway
 
       SHEKEL_DOLLAR_URL = 'https://secure.tranzila.com/cgi-bin/tranzila31.cgi'
-      MULTICURRENCY_URL = 'https://secure.tranzila.com/cgi-bin/tranzila36a.cgi'
+      MULTICURRENCY_URL = 'https://secure.tranzila.com/cgi-bin/tranzila31.cgi'
 
       RESPONSE_MESSAGES = {
         '000' => 'Transaction approved',
