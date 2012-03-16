@@ -436,7 +436,7 @@ module ActiveMerchant #:nodoc:
       end
 
       def to_query_s(hash)
-        hash.map{|k,v| "#{k}=#{v.gsub(/[^a-zA-Z0-9_\-.]/n){ sprintf("%%%02X", $&.unpack("C")[0]) }}"}.join("&")
+        hash.map{|k,v| "#{k}=#{v.to_s.gsub(/[^a-zA-Z0-9_\-.]/n){ sprintf("%%%02X", $&.unpack("C")[0]) }}"}.join("&")
       end
     end
   end
