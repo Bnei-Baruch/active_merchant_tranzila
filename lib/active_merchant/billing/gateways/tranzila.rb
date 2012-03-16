@@ -35,7 +35,7 @@ module ActiveMerchant #:nodoc:
     class TranzilaGateway < Gateway
 
       SHEKEL_DOLLAR_URL = 'https://secure.tranzila.com/cgi-bin/tranzila31.cgi'
-      MULTICURRENCY_URL = 'https://secure.tranzila.com/cgi-bin/tranzila31.cgi'
+      MULTI_CURRENCY_URL = 'https://secure.tranzila.com/cgi-bin/tranzila36a.cgi'
 
       RESPONSE_MESSAGES = {
         '000' => 'Transaction approved',
@@ -237,6 +237,8 @@ module ActiveMerchant #:nodoc:
       #   * <tt>:supplier</tt> - The Tranzila account name.
       def initialize(options = {})
         requires!(options, :supplier, :currency)
+        @shekel_dollar_url = options.delete(:shekel_dollar_url) || SHEKEL_DOLLAR_URL
+        @multi_currency_url = options.delete(:multi_currency_url) || MULTI_CURRENCY_URL
         @options = options
         super
       end
@@ -344,7 +346,7 @@ module ActiveMerchant #:nodoc:
       end
 
       def commit(action, money, creditcard, options = {})
-        response = parse(ssl_post(multicurrency? ? MULTICURRENCY_URL : SHEKEL_DOLLAR_URL, post_data(action, money, creditcard, options)))
+        response = parse(ssl_post(multi_currency? ? @multi_currency_url : @shekel_dollar_url, post_data(action, money, creditcard, options)))
 
         Response.new(successful?(response), message_from(response), response,
           :test => test?,
@@ -353,7 +355,10 @@ module ActiveMerchant #:nodoc:
         )
       end
 
-      def multicurrency?
+      # 1 - ILS
+      # 2 - USD
+      # 4 - Shekel transaction with installments linked to the US Dollar
+      def multi_currency?
         ![1, 2, 4].include?(@options[:currency])
       end
 
@@ -427,11 +432,11 @@ module ActiveMerchant #:nodoc:
 
           #tranzila registered supplier (test3)
           :supplier => @options[:supplier]
-        }
+        }.merge(options[:user_defined_fields])
       end
 
       def to_query_s(hash)
-        hash.map{|k,v| "#{k}=#{v}"}.join("&")
+        hash.map{|k,v| "#{k}=#{v.gsub(/[^a-zA-Z0-9_\-.]/n){ sprintf("%%%02X", $&.unpack("C")[0]) }}"}.join("&")
       end
     end
   end
