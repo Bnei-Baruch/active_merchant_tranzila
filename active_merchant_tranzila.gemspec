@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active_merchant_tranzila}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Vitaly Kushner"]
-  s.date = %q{2010-08-11}
+  s.date = %q{2012-03-18}
   s.description = %q{Tranzila Gateway for Money Gem}
   s.email = %q{vitaly@astrails.com}
   s.extra_rdoc_files = [
