@@ -350,6 +350,8 @@ module ActiveMerchant #:nodoc:
       def response_to_h(body)
         parts = body.split(/&|=/)
         Hash[*parts]
+      rescue => e
+        raise "Invalid body: #{body}"
       end
 
       def commit(action, money, creditcard, options = {})
