@@ -355,7 +355,12 @@ module ActiveMerchant #:nodoc:
       end
 
       def commit(action, money, creditcard, options = {})
-        response = parse(ssl_post(URL, post_data(action, money, creditcard, options)))
+        request_body = post_data(action, money, creditcard, options)
+        response_body = ssl_post(URL, request_body)
+
+        broadcast_event('commit.payment', request_body: filter_request(request_body), response_body: response_body, gateway: 'tranzilla', action: action)
+
+        response = parse(response_body)
         if action == 'get_token'
           response['TranzilaTK']
         else
@@ -365,6 +370,11 @@ module ActiveMerchant #:nodoc:
                        :cvv_result => response['CVVstatus']
           )
         end
+      end
+
+      def filter_request(req)
+        res = req.match(/(.+)ccno=(\d+)(\d{4})(.+)mycvv=(\d+)(.+)/)
+        "#{res[1]}ccno=#{res[3]}#{res[4]}mycvv=***#{res[6]}"
       end
 
       def successful?(response)
@@ -486,6 +496,17 @@ module ActiveMerchant #:nodoc:
         # hash.map{|k,v| "#{k}=#{v.to_s.gsub(/[^a-zA-Z0-9_\-.]/n){ sprintf("%%%02X", $&.unpack("C")[0]) }}"}.join("&")
         hash.map { |k, v| "#{k}=#{v}" }.join("&")
       end
+
+      def broadcast_event(event_name, payload={})
+        if block_given?
+          ActiveSupport::Notifications.instrument(event_name, payload) do
+            yield
+          end
+        else
+          ActiveSupport::Notifications.instrument(event_name, payload)
+        end
+      end
+
     end
   end
 end
