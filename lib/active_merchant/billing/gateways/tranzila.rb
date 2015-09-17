@@ -356,9 +356,9 @@ module ActiveMerchant #:nodoc:
 
       def commit(action, money, creditcard, options = {})
         request_body = post_data(action, money, creditcard, options)
-        request_body = filter_request(request_body) unless action == 'sale_token'
         response_body = ssl_post(URL, request_body)
 
+        request_body = filter_request(request_body) unless action == 'sale_token'
         broadcast_event('commit.payment', request_body: request_body, response_body: response_body, gateway: 'tranzilla', action: action)
 
         response = parse(response_body)
