@@ -364,7 +364,7 @@ module ActiveMerchant #:nodoc:
         begin
           response = parse(response_body)
         rescue
-          return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES['705'], {:Response => RESPONSE_MESSAGES['705']},
+          return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES['705'], {:Response => '510'},
                                                        :test => test?,
                                                        :authorization => 'N/A',
                                                        :cvv_result => 'N/A'
