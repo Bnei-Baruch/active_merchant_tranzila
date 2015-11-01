@@ -359,16 +359,25 @@ module ActiveMerchant #:nodoc:
         response_body = ssl_post(URL, request_body)
 
         request_body = filter_request(request_body) unless action == 'sale_token'
-        broadcast_event('commit.payment', request_body: request_body, response_body: response_body, gateway: 'tranzilla', action: action)
+        broadcast_event('commit.payment', :request_body => request_body, :response_body => response_body, :gateway => 'tranzilla', :action => action)
 
-        response = parse(response_body)
+        begin
+          response = parse(response_body)
+        rescue
+          return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES['705'], {:Response => RESPONSE_MESSAGES['705']},
+                                                       :test => test?,
+                                                       :authorization => 'N/A',
+                                                       :cvv_result => 'N/A'
+          )
+        end
+
         if action == 'get_token'
           response['TranzilaTK']
         else
-          Response.new(successful?(response), message_from(response), response,
-                       :test => test?,
-                       :authorization => response['ConfirmationCode'],
-                       :cvv_result => response['CVVstatus']
+          ActiveMerchant::Billing::Response.new(successful?(response), message_from(response), response,
+                                                :test => test?,
+                                                :authorization => response['ConfirmationCode'],
+                                                :cvv_result => response['CVVstatus']
           )
         end
       end
@@ -495,7 +504,7 @@ module ActiveMerchant #:nodoc:
 
       def to_query_s(hash)
         # hash.map{|k,v| "#{k}=#{v.to_s.gsub(/[^a-zA-Z0-9_\-.]/n){ sprintf("%%%02X", $&.unpack("C")[0]) }}"}.join("&")
-        hash.map { |k, v| "#{k}=#{v}" }.join("&")
+        hash.map { |k, v| "#{k}=#{v.is_a?(String) ? URI.escape(v) : v}" }.join("&")
       end
 
       def broadcast_event(event_name, payload={})
