@@ -361,7 +361,7 @@ module ActiveMerchant #:nodoc:
         request_body  = post_data(action, money, creditcard, options)
         response_body = ssl_post(URL, request_body)
 
-        request_body  = filter_request(request_body) unless %w(sale_token_j5 sale_token_j4).includes? action
+        request_body  = filter_request(request_body) unless %w(sale_token_j5 sale_token_j4).include? action
         broadcast_event('commit.payment', :request_body => request_body, :response_body => response_body, :gateway => 'tranzilla', :action => action)
 
         begin
