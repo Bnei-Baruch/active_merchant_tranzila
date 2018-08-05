@@ -463,7 +463,6 @@ module ActiveMerchant #:nodoc:
             :currency   => @options[:currency],
             :tranmode   => 'F',
             :TranzilaTK => options[:TranzilaTK],
-            :exdate     => '0120',
 
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
@@ -478,6 +477,7 @@ module ActiveMerchant #:nodoc:
             :currency   => @options[:currency],
             :tranmode   => 'V',
             :TranzilaTK => options[:TranzilaTK],
+            :exdate     => '0120',
 
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
