@@ -269,7 +269,10 @@ module ActiveMerchant #:nodoc:
 
       def purchase_token(cents, options = {})
         requires!(options, :TranzilaTK, :myid)
-        commit('sale_token', cents, nil, options)
+        result           = commit('sale_token_j5', cents, nil, options)
+        options[:authnr] = result[:authnr]
+        options[:index]  = result[:index]
+        commit('sale_token_j4', cents, nil, options)
       end
 
       # Authorize
@@ -355,29 +358,32 @@ module ActiveMerchant #:nodoc:
       end
 
       def commit(action, money, creditcard, options = {})
-        request_body = post_data(action, money, creditcard, options)
+        request_body  = post_data(action, money, creditcard, options)
         response_body = ssl_post(URL, request_body)
 
-        request_body = filter_request(request_body) unless action == 'sale_token'
+        request_body  = filter_request(request_body) unless %w(sale_token_j5 sale_token_j4).includes? action
         broadcast_event('commit.payment', :request_body => request_body, :response_body => response_body, :gateway => 'tranzilla', :action => action)
 
         begin
           response = parse(response_body)
         rescue
-          return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES['705'], {:Response => '510'},
-                                                       :test => test?,
+          return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES['705'], { :Response => '510' },
+                                                       :test          => test?,
                                                        :authorization => 'N/A',
-                                                       :cvv_result => 'N/A'
+                                                       :cvv_result    => 'N/A'
           )
         end
 
         if action == 'get_token'
           response['TranzilaTK']
+        elsif action == 'sale_token_j5'
+          puts "RESPONSE: ", response
+          response
         else
           ActiveMerchant::Billing::Response.new(successful?(response), message_from(response), response,
-                                                :test => test?,
+                                                :test          => test?,
                                                 :authorization => response['ConfirmationCode'],
-                                                :cvv_result => response['CVVstatus']
+                                                :cvv_result    => response['CVVstatus']
           )
         end
       end
@@ -401,20 +407,21 @@ module ActiveMerchant #:nodoc:
         return authorize_parameters(money, creditcard, options) if action == 'authorize'
         return capture_parameters(money, creditcard, options) if action == 'capture'
         return token_request_parameters(creditcard) if action == 'get_token'
-        return token_purchase_parameters(money, options) if action == 'sale_token'
+        return token_purchase_j4(money, options) if action == 'sale_token_j4'
+        return token_purchase_j5(money, options) if action == 'sale_token_j5'
       end
 
       def capture_parameters(money, creditcard, options = {})
         to_query_s({
-                       :task => "Doforce",
+                       :task     => "Doforce",
                        :tranmode => 'F',
-                       :authnr => options[:ConfirmationCode]
+                       :authnr   => options[:ConfirmationCode]
                    }.merge(default_parameters_hash(money, creditcard, options)))
       end
 
       def authorize_parameters(money, creditcard, options = {})
         to_query_s({
-                       :task => 'Doverify',
+                       :task     => 'Doverify',
                        :tranmode => 'V',
                    }.merge(default_parameters_hash(money, creditcard, options)))
       end
@@ -422,22 +429,22 @@ module ActiveMerchant #:nodoc:
       def refund_parametes(money, creditcard, options = {})
         to_query_s({
                        :tranmode => "C#{options[:index]}",
-                       :authnr => options[:ConfirmationCode],
+                       :authnr   => options[:ConfirmationCode],
                    }.merge(default_parameters_hash(money, creditcard, options)))
       end
 
       def token_request_parameters(creditcard)
         to_query_s({
                        :TranzilaPW => @options[:TranzilaPW],
-                       :supplier => @options[:supplier],
-                       :ccno => creditcard.number,
-                       :mycvv => creditcard.verification_value,
+                       :supplier   => @options[:supplier],
+                       :ccno       => creditcard.number,
+                       :mycvv      => creditcard.verification_value,
 
                        # dummy - just to work with 71u.cgi tranzila URL
-                       :currency => 1,
-                       :sum => 1,
-                       :tranmode => 'VK',
-                       :expdate => 0114,
+                       :currency   => 1,
+                       :sum        => 1,
+                       :tranmode   => 'VK',
+                       :expdate    => 0114,
                        :TranzilaTK => 1
                    })
       end
@@ -450,33 +457,62 @@ module ActiveMerchant #:nodoc:
         to_query_s(default_token_parameters_hash(money, options))
       end
 
+      def token_purchase_j4(money, options = {})
+        params = {
+            :sum        => amount(money),
+            :currency   => @options[:currency],
+            :tranmode   => 'F',
+            :TranzilaTK => options[:TranzilaTK],
+
+            #tranzila registered supplier (test3)
+            :supplier   => @options[:supplier],
+            :TranzilaPW => @options[:TranzilaPW],
+        }.merge(options[:user_defined_fields])
+        to_query_s(params)
+      end
+
+      def token_purchase_j5(money, options = {})
+        params = {
+            :sum        => amount(money),
+            :currency   => @options[:currency],
+            :tranmode   => 'V',
+            :TranzilaTK => options[:TranzilaTK],
+
+            #tranzila registered supplier (test3)
+            :supplier   => @options[:supplier],
+            :TranzilaPW => @options[:TranzilaPW],
+            :mycvv      => options[:mycvv]
+        }.merge(options[:user_defined_fields])
+        to_query_s(params)
+      end
+
       def default_token_parameters_hash(money, options = {})
         year = options[:expyear].to_s[-2, 2]
         {
-            :sum => amount(money),
+            :sum        => amount(money),
             :TranzilaTK => options[:TranzilaTK],
-            :expyear => year,
-            :expmonth => options[:expmonth],
-            :expdate => "#{options[:expmonth]}#{year}",
+            :expyear    => year,
+            :expmonth   => options[:expmonth],
+            :expdate    => "#{options[:expmonth]}#{year}",
 
-            :currency => @options[:currency],
-            :myid => options[:myid],
+            :currency   => @options[:currency],
+            :myid       => options[:myid],
 
             #tranzila registered supplier (test3)
-            :supplier => @options[:supplier],
+            :supplier   => @options[:supplier],
             :TranzilaPW => @options[:TranzilaPW],
-            :mycvv => options[:mycvv]
+            :mycvv      => options[:mycvv]
         }.merge(options[:user_defined_fields])
       end
 
       def default_parameters_hash(money, creditcard, options = {})
         {
-            :sum => amount(money),
-            :ccno => creditcard.number,
-            :expyear => creditcard.year.to_s[-2, 2],
+            :sum      => amount(money),
+            :ccno     => creditcard.number,
+            :expyear  => creditcard.year.to_s[-2, 2],
             :expmonth => creditcard.month,
-            :expdate => "#{creditcard.month}#{creditcard.year.to_s[-2, 2]}",
-            :mycvv => creditcard.verification_value,
+            :expdate  => "#{creditcard.month}#{creditcard.year.to_s[-2, 2]}",
+            :mycvv    => creditcard.verification_value,
 
             #Possible Values:
             #1- Regular Credit
@@ -488,8 +524,8 @@ module ActiveMerchant #:nodoc:
             #8- Installments
             #9- Club installments
             :cred_type => options[:cred_type],
-            :currency => @options[:currency],
-            :myid => options[:myid],
+            :currency  => @options[:currency],
+            :myid      => options[:myid],
 
             #transaction with installments (field - cred_type must be 8)
             :fpay => options[:fpay] || '',
@@ -497,7 +533,7 @@ module ActiveMerchant #:nodoc:
             :npay => options[:npay] || '1',
 
             #tranzila registered supplier (test3)
-            :supplier => @options[:supplier],
+            :supplier   => @options[:supplier],
             :TranzilaPW => @options[:TranzilaPW]
         }.merge(options[:user_defined_fields])
       end
@@ -507,7 +543,7 @@ module ActiveMerchant #:nodoc:
         hash.map { |k, v| "#{k}=#{v.is_a?(String) ? URI.escape(v) : v}" }.join("&")
       end
 
-      def broadcast_event(event_name, payload={})
+      def broadcast_event(event_name, payload = {})
         if block_given?
           ActiveSupport::Notifications.instrument(event_name, payload) do
             yield
