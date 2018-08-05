@@ -270,7 +270,7 @@ module ActiveMerchant #:nodoc:
       def purchase_token(cents, options = {})
         requires!(options, :TranzilaTK, :myid)
         result           = commit('sale_token_j5', cents, nil, options)
-        options[:authnr] = result[:authnr]
+        options[:authnr] = result[:ConfirmationCode]
         options[:index]  = result[:index]
         commit('sale_token_j4', cents, nil, options)
       end
@@ -463,6 +463,7 @@ module ActiveMerchant #:nodoc:
             :currency   => @options[:currency],
             :tranmode   => 'F',
             :TranzilaTK => options[:TranzilaTK],
+            :exdate     => '0120',
 
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
@@ -481,7 +482,6 @@ module ActiveMerchant #:nodoc:
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
             :TranzilaPW => @options[:TranzilaPW],
-            :mycvv      => options[:mycvv]
         }.merge(options[:user_defined_fields])
         to_query_s(params)
       end
