@@ -270,8 +270,8 @@ module ActiveMerchant #:nodoc:
       def purchase_token(cents, options = {})
         requires!(options, :TranzilaTK, :myid)
         result           = commit('sale_token_j5', cents, nil, options)
-        options[:authnr] = result[:ConfirmationCode]
-        options[:index]  = result[:index]
+        options[:authnr] = result['ConfirmationCode']
+        options[:index]  = result['index']
         commit('sale_token_j4', cents, nil, options)
       end
 
@@ -361,7 +361,7 @@ module ActiveMerchant #:nodoc:
         request_body  = post_data(action, money, creditcard, options)
         response_body = ssl_post(URL, request_body)
 
-        request_body  = filter_request(request_body) unless %w(sale_token_j5 sale_token_j4).include? action
+        request_body = filter_request(request_body)
         broadcast_event('commit.payment', :request_body => request_body, :response_body => response_body, :gateway => 'tranzilla', :action => action)
 
         begin
@@ -377,7 +377,6 @@ module ActiveMerchant #:nodoc:
         if action == 'get_token'
           response['TranzilaTK']
         elsif action == 'sale_token_j5'
-          puts "RESPONSE: ", response
           response
         else
           ActiveMerchant::Billing::Response.new(successful?(response), message_from(response), response,
@@ -463,6 +462,8 @@ module ActiveMerchant #:nodoc:
             :currency   => @options[:currency],
             :tranmode   => 'F',
             :TranzilaTK => options[:TranzilaTK],
+            :authnr     => options[:authnr],
+            :index      => options[:index],
 
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
@@ -472,12 +473,14 @@ module ActiveMerchant #:nodoc:
       end
 
       def token_purchase_j5(money, options = {})
+        year   = options[:expyear].to_s[-2, 2]
         params = {
             :sum        => amount(money),
             :currency   => @options[:currency],
             :tranmode   => 'V',
             :TranzilaTK => options[:TranzilaTK],
-            :exdate     => '0120',
+            :expdate    => "#{options[:expmonth]}#{year}",
+            :cred_type  => '1',
 
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
