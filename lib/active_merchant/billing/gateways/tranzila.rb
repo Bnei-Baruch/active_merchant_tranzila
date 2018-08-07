@@ -269,7 +269,7 @@ module ActiveMerchant #:nodoc:
 
       def purchase_token(cents, options = {})
         requires!(options, :TranzilaTK, :myid)
-        result           = commit('sale_token_j5', cents, nil, options)
+        result = commit('sale_token_j5', cents, nil, options)
         return result if result['Response'] != '000'
         options[:authnr] = result['ConfirmationCode']
         options[:index]  = result['index']
@@ -378,8 +378,16 @@ module ActiveMerchant #:nodoc:
         if action == 'get_token'
           response['TranzilaTK']
         elsif action == 'sale_token_j5'
-          puts "J5 response: #{response.inspect}"
-          response
+          code = result['Response']
+          if code != '000'
+            return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES[code], { :Response => code },
+                                                         :test          => test?,
+                                                         :authorization => 'N/A',
+                                                         :cvv_result    => 'N/A'
+            )
+          else
+            response
+          end
         else
           ActiveMerchant::Billing::Response.new(successful?(response), message_from(response), response,
                                                 :test          => test?,
