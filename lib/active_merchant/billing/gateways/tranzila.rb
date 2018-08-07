@@ -378,9 +378,9 @@ module ActiveMerchant #:nodoc:
         if action == 'get_token'
           response['TranzilaTK']
         elsif action == 'sale_token_j5'
-          code = result['Response']
+          code = response['Response']
           if code != '000'
-            return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES[code], { :Response => code },
+            ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES[code], { :Response => code },
                                                          :test          => test?,
                                                          :authorization => 'N/A',
                                                          :cvv_result    => 'N/A'
