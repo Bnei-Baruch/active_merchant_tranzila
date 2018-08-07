@@ -378,6 +378,7 @@ module ActiveMerchant #:nodoc:
         if action == 'get_token'
           response['TranzilaTK']
         elsif action == 'sale_token_j5'
+          puts "J5 response: #{response.inspect}"
           response
         else
           ActiveMerchant::Billing::Response.new(successful?(response), message_from(response), response,
