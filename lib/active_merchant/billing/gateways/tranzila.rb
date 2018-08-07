@@ -270,6 +270,7 @@ module ActiveMerchant #:nodoc:
       def purchase_token(cents, options = {})
         requires!(options, :TranzilaTK, :myid)
         result           = commit('sale_token_j5', cents, nil, options)
+        return result if result['Response'] != '000'
         options[:authnr] = result['ConfirmationCode']
         options[:index]  = result['index']
         commit('sale_token_j4', cents, nil, options)
