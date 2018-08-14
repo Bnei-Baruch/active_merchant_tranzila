@@ -273,7 +273,7 @@ module ActiveMerchant #:nodoc:
         return result if result.is_a? ActiveMerchant::Billing::Response
         
         options[:authnr] = result['ConfirmationCode']
-        options[:index]  = result['index']
+        options[:index]  = result['index'].gsub(/ /, '')
         commit('sale_token_j4', cents, nil, options)
       end
 
