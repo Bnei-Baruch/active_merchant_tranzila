@@ -491,13 +491,13 @@ module ActiveMerchant #:nodoc:
       end
 
       def token_purchase_j5(money, options = {})
-        year   = Time.new.year + 2
+        year   = (Time.new.year + 2).to_s[2, 2] # last 2 digits
         params = {
             :sum        => amount(money),
             :currency   => @options[:currency],
             :tranmode   => 'V',
             :TranzilaTK => options[:TranzilaTK],
-            :expdate    => "#{01}#{year}",
+            :expdate    => "01#{year}",
             :cred_type  => '1',
 
             #tranzila registered supplier (test3)
