@@ -274,6 +274,7 @@ module ActiveMerchant #:nodoc:
         
         options[:authnr] = result['ConfirmationCode']
         options[:index]  = result['index'].gsub(/ /, '')
+        options = options.except(:xxxFirstName, :xxxLastName, :xxxEmail, :xxxComment, :xxxCountry, :xxxLocale, :xxxEventId)
         commit('sale_token_j4', cents, nil, options)
       end
 
