@@ -473,13 +473,13 @@ module ActiveMerchant #:nodoc:
       end
 
       def token_purchase_j4(money, options = {})
-        year   = options[:expyear].to_s[-2, 2]
+        year   = (Time.new.year + 2).to_s[2, 2] # last 2 digits
         params = {
             :sum        => amount(money),
             :currency   => @options[:currency],
             :tranmode   => 'F',
             :TranzilaTK => options[:TranzilaTK],
-            :expdate    => "#{options[:expmonth]}#{year}",
+            :expdate    => "01#{year}",
             :cred_type  => '1',
             :authnr     => options[:authnr],
             :index      => options[:index],
