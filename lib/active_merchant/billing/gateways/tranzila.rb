@@ -494,7 +494,7 @@ module ActiveMerchant #:nodoc:
       def token_purchase_j5(money, options = {})
         year   = (Time.new.year + 2).to_s[2, 2] # last 2 digits
         params = {
-            :sum        => amount(money),
+            :sum        => 0, # amount(money),
             :currency   => @options[:currency],
             :tranmode   => 'V',
             :TranzilaTK => options[:TranzilaTK],
