@@ -487,7 +487,7 @@ module ActiveMerchant #:nodoc:
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
             :TranzilaPW => @options[:TranzilaPW],
-        } #.merge(options[:user_defined_fields])
+        }.merge(options[:user_defined_fields])
         to_query_s(params)
       end
 
@@ -504,7 +504,7 @@ module ActiveMerchant #:nodoc:
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
             :TranzilaPW => @options[:TranzilaPW],
-        } #.merge(options[:user_defined_fields])
+        }.merge(options[:user_defined_fields])
         to_query_s(params)
       end
 
