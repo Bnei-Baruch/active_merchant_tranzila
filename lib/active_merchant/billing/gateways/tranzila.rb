@@ -268,12 +268,12 @@ module ActiveMerchant #:nodoc:
       end
 
       def purchase_token(cents, options = {})
-        requires!(options, :TranzilaTK, :myid)
-        result = commit('sale_token_j5', cents, nil, options)
-        return result if result.is_a? ActiveMerchant::Billing::Response
+        # requires!(options, :TranzilaTK, :myid)
+        # result = commit('sale_token_j5', cents, nil, options)
+        # return result if result.is_a? ActiveMerchant::Billing::Response
         
-        options[:authnr] = result['ConfirmationCode']
-        options[:index]  = result['index'].gsub(/ /, '')
+        # options[:authnr] = result['ConfirmationCode']
+        # options[:index]  = result['index'].gsub(/ /, '')
         options = options.except(:xxxFirstName, :xxxLastName, :xxxEmail, :xxxComment, :xxxCountry, :xxxLocale, :xxxEventId)
         commit('sale_token_j4', cents, nil, options)
       end
