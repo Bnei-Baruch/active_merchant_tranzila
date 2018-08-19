@@ -275,7 +275,8 @@ module ActiveMerchant #:nodoc:
         # options[:authnr] = result['ConfirmationCode']
         # options[:index]  = result['index'].gsub(/ /, '')
         options = options.except(:xxxFirstName, :xxxLastName, :xxxEmail, :xxxComment, :xxxCountry, :xxxLocale, :xxxEventId)
-        commit('sale_token_j4', cents, nil, options)
+        # commit('sale_token_j4', cents, nil, options)
+        commit('sale_token', cents, nil, options)
       end
 
       # Authorize
@@ -364,7 +365,7 @@ module ActiveMerchant #:nodoc:
         request_body  = post_data(action, money, creditcard, options)
         response_body = ssl_post(URL, request_body)
 
-        request_body  = filter_request(request_body) unless %w(sale_token_j5 sale_token_j4).include? action
+        request_body  = filter_request(request_body) unless %w(sale_token_j5 sale_token_j4 sale_token).include? action
         broadcast_event('commit.payment', :request_body => request_body, :response_body => response_body, :gateway => 'tranzilla', :action => action)
 
         begin
@@ -424,6 +425,7 @@ module ActiveMerchant #:nodoc:
         return token_request_parameters(creditcard) if action == 'get_token'
         return token_purchase_j4(money, options) if action == 'sale_token_j4'
         return token_purchase_j5(money, options) if action == 'sale_token_j5'
+        return token_purchase_parameters(money, options) if action == 'sale_token'
       end
 
       def capture_parameters(money, creditcard, options = {})
