@@ -268,7 +268,7 @@ module ActiveMerchant #:nodoc:
       end
 
       def purchase_token(cents, options = {}, country_iso)
-        if country_iso == 'IL'
+        if false && country_iso == 'IL'
           requires!(options, :TranzilaTK, :myid)
           result = commit('sale_token_j5', cents, nil, options)
           return result if result.is_a? ActiveMerchant::Billing::Response
