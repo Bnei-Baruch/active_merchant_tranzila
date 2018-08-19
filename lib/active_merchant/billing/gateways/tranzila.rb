@@ -482,7 +482,7 @@ module ActiveMerchant #:nodoc:
             :expdate    => "01#{year}",
             :cred_type  => '1',
             :authnr     => options[:authnr],
-            :index      => options[:index],
+            #:index      => options[:index],
 
             #tranzila registered supplier (test3)
             :supplier   => @options[:supplier],
