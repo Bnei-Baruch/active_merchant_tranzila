@@ -267,16 +267,18 @@ module ActiveMerchant #:nodoc:
         commit('get_token', nil, creditcard, nil)
       end
 
-      def purchase_token(cents, options = {})
-        # requires!(options, :TranzilaTK, :myid)
-        # result = commit('sale_token_j5', cents, nil, options)
-        # return result if result.is_a? ActiveMerchant::Billing::Response
-        
-        # options[:authnr] = result['ConfirmationCode']
-        # options[:index]  = result['index'].gsub(/ /, '')
-        options = options.except(:xxxFirstName, :xxxLastName, :xxxEmail, :xxxComment, :xxxCountry, :xxxLocale, :xxxEventId)
-        # commit('sale_token_j4', cents, nil, options)
-        commit('sale_token', cents, nil, options)
+      def purchase_token(cents, options = {}, country_iso)
+        if country_iso == 'IL'
+          requires!(options, :TranzilaTK, :myid)
+          result = commit('sale_token_j5', cents, nil, options)
+          return result if result.is_a? ActiveMerchant::Billing::Response
+
+          options[:authnr] = result['ConfirmationCode']
+          options[:index]  = result['index'].gsub(/ /, '')
+          commit('sale_token_j4', cents, nil, options)
+        else
+          commit('sale_token', cents, nil, options)
+        end
       end
 
       # Authorize
@@ -390,9 +392,9 @@ module ActiveMerchant #:nodoc:
             code = response['Response']
             puts "############ 03. Code: #{code}"
             ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES[code], { :Response => code },
-                                                         :test          => test?,
-                                                         :authorization => 'N/A',
-                                                         :cvv_result    => 'N/A'
+                                                  :test          => test?,
+                                                  :authorization => 'N/A',
+                                                  :cvv_result    => 'N/A'
             )
           end
         else
@@ -496,7 +498,7 @@ module ActiveMerchant #:nodoc:
       def token_purchase_j5(money, options = {})
         year   = (Time.new.year + 2).to_s[2, 2] # last 2 digits
         params = {
-            :sum        => amount(1), # amount(money),
+            :sum => amount(1), # amount(money), -- that's enough for J5
             :currency   => @options[:currency],
             :tranmode   => 'V',
             :TranzilaTK => options[:TranzilaTK],
