@@ -372,7 +372,9 @@ module ActiveMerchant #:nodoc:
 
         begin
           response = parse(response_body)
-        rescue
+        rescue StandardError => e
+          puts e.message
+          puts e.backtrace.inspect
           return ActiveMerchant::Billing::Response.new(false, RESPONSE_MESSAGES['705'], { :Response => '510' },
                                                        :test          => test?,
                                                        :authorization => 'N/A',
